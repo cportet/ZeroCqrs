@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/ZeroCqrs/ZeroCqrs.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ZeroCqrs.Tests/ZeroCqrs.Tests.csproj" />
+  </Folder>
+</Solution>
