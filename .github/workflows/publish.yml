@@ -1,4 +1,4 @@
-name: Publish NuGet
+﻿name: Publish NuGet
 
 on:
   push:
@@ -20,11 +20,13 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Restore & Build & Test
+      - name: Restore & Build
         run: |
           dotnet restore
           dotnet build --configuration Release --no-restore
-          dotnet test --configuration Release --no-build --verbosity normal
+
+      - name: Test
+        run: dotnet test --configuration Release --no-build --verbosity normal
 
       - name: Pack
         run: |
@@ -32,14 +34,14 @@ jobs:
           VERSION=${VERSION#v}
           dotnet pack src/ZeroCqrs/ZeroCqrs.csproj \
             --configuration Release \
-            \
-            -o ./artifacts                            \
-            -p:Version=$VERSION                       \
+            -o ./artifacts \
+            -p:Version=$VERSION \
             -p:RepositoryUrl=https://github.com/cportet/ZeroCqrs
 
+      - name: NuGet login (OIDC → temp API key)
+        uses: nuget/setup-nuget@v2
+        with:
+          nuget-api-key: ${{ secrets.NUGET_USER }} 
+
       - name: Publish to NuGet
-        run: |
-          dotnet nuget push "./artifacts/*.nupkg" \
-            --source https://api.nuget.org/v3/index.json \
-            --skip-duplicate \
-            --api-key az
+        run: dotnet nuget push "./artifacts/*.nupkg" --source https://api.nuget.org/v3/index.json --skip-duplicate
