@@ -8,7 +8,7 @@ public class UserQueriesHandlers(UserRepository repository) :
 {
     public Task<UserDetails> Answer(GetUserById query, CancellationToken ct = default)
     {
-        var user = repository.GetById(query.Id);
+        var user = repository.Get(query.Id);
 
         if (user is null)
             throw new KeyNotFoundException($"User with Id {query.Id} not found.");

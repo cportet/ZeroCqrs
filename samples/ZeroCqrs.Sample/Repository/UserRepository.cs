@@ -34,7 +34,7 @@ public class UserRepository(int count = 10000)
 
     public IReadOnlyList<User> GetAll() => _users.AsReadOnly();
 
-    public User? GetById(Guid id) => _users.FirstOrDefault(x => x.Id == id);
+    public User? Get(Guid id) => _users.FirstOrDefault(x => x.Id == id);
 
     public void Add(User newUser)
     {

@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ZeroCqrs.Sample.Commands;
 using ZeroCqrs.Sample.Repository;
 
 namespace ZeroCqrs.Sample;
