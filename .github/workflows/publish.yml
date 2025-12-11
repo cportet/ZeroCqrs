@@ -20,20 +20,26 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Restore
-        run: dotnet restore
-
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
-
-      - name: Test
-        run: dotnet test --configuration Release --no-build --verbosity normal
+      - name: Restore & Build & Test
+        run: |
+          dotnet restore
+          dotnet build --configuration Release --no-restore
+          dotnet test --configuration Release --no-build --verbosity normal
 
       - name: Pack
         run: |
           VERSION=${{ github.ref_name }}
           VERSION=${VERSION#v}
-          dotnet pack src/ZeroCqrs/ZeroCqrs.csproj --configuration Release -o ./artifacts -p:Version=$VERSION -p:RepositoryUrl=https://github.com/cportet/ZeroCqrs
+          dotnet pack src/ZeroCqrs/ZeroCqrs.csproj \
+            --configuration Release \
+            \
+            -o ./artifacts                            \
+            -p:Version=$VERSION                       \
+            -p:RepositoryUrl=https://github.com/cportet/ZeroCqrs
 
-      - name: Publish to NuGet (Trusted Publishing)
-        run: dotnet nuget push "./artifacts/*.nupkg" --source https://api.nuget.org/v3/index.json --skip-duplicate
+      - name: Publish to NuGet
+        run: |
+          dotnet nuget push "./artifacts/*.nupkg" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate \
+            --api-key az
