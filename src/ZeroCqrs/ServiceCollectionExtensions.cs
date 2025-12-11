@@ -11,11 +11,13 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         params Type[] handlerAssemblyMarkerTypes)
     {
-        services.AddScoped<CqrsQueryBus>();
+        services.AddScoped<CqrsZeroQueryBus>();
+        services.AddScoped<IZeroQueryBus>(sp => sp.GetRequiredService<CqrsZeroQueryBus>());
+
         RegisterHandlers(
             services,
             handlerAssemblyMarkerTypes,
-            i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IQueryHandler<,>));
+            i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IZeroQueryHandler<,>));
         return services;
     }
 
@@ -23,12 +25,14 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         params Type[] handlerAssemblyMarkerTypes)
     {
-        services.AddScoped<CqrsCommandBus>();
+        services.AddScoped<CqrsZeroCommandBus>();
+        services.AddScoped<IZeroCommandBus>(sp => sp.GetRequiredService<CqrsZeroCommandBus>());
+
         RegisterHandlers(
             services,
             handlerAssemblyMarkerTypes,
             i => i.IsGenericType && (
-                i.GetGenericTypeDefinition() == typeof(ICommandHandler<>) ||
+                i.GetGenericTypeDefinition() == typeof(IZeroCommandHandler<>) ||
                 i.GetGenericTypeDefinition() == typeof(ICommandHandler<,>)));
         return services;
     }
@@ -47,7 +51,7 @@ public static class ServiceCollectionExtensions
     {
         var assemblies = markerTypes?.Length > 0
             ? markerTypes.Select(t => t.Assembly).Distinct()
-            : [Assembly.GetCallingAssembly()];
+            : [Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly()];
 
         var handlerTypes = assemblies
             .SelectMany(a => a.GetTypes())

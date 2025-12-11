@@ -64,7 +64,7 @@ public class CommandTests
         Assert.Equal("command", ex.ParamName);
     }
 
-    private CqrsCommandBus RegisterCommandBus()
+    private IZeroCommandBus RegisterCommandBus()
     {
         var services = new ServiceCollection();
 
@@ -72,24 +72,24 @@ public class CommandTests
         services.AddZeroCqrsCommands(typeof(DoSomethingHandler));
 
         var provider = services.BuildServiceProvider();
-        var bus = provider.GetRequiredService<CqrsCommandBus>();
+        var bus = provider.GetRequiredService<IZeroCommandBus>();
 
         return bus;
     }
 }
 
-public sealed record DoSomethingCommand : ICommand;
+public sealed record DoSomethingCommand : IZeroCommand;
 
-public sealed record DoOtherCommandNotHandled : ICommand;
+public sealed record DoOtherCommandNotHandled : IZeroCommand;
 
-public sealed record DoAsyncCommand : ICommand;
+public sealed record DoAsyncCommand : IZeroCommand;
 
-public sealed record DoCancellableCommand : ICommand;
+public sealed record DoCancellableCommand : IZeroCommand;
 
 public class DoSomethingHandler(HandlerSpy spy) :
-    ICommandHandler<DoSomethingCommand>,
-    ICommandHandler<DoAsyncCommand>,
-    ICommandHandler<DoCancellableCommand>
+    IZeroCommandHandler<DoSomethingCommand>,
+    IZeroCommandHandler<DoAsyncCommand>,
+    IZeroCommandHandler<DoCancellableCommand>
 {
     public Task Execute(DoSomethingCommand command, CancellationToken ct = default)
     {

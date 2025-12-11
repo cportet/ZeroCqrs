@@ -30,9 +30,9 @@ Cas d'usage : Demander une requête et obtenir un résultat.
 
 ```csharp
 // Récupération d’un utilisateur par son ID
-public record GetUserQuery(int Id) : IQuery<UserDto>;
+public record GetUserQuery(int Id) : IZeroQuery<UserDto>;
 
-public class GetUserQueryHandler(AppDbContext db) : IQueryHandler<GetUserQuery, UserDto>
+public class GetUserQueryHandler(AppDbContext db) : IZeroQueryHandler<GetUserQuery, UserDto>
 {
     public async Task<UserDto> Answer(GetUserQuery query, CancellationToken ct = default)
     {
@@ -47,7 +47,7 @@ public class GetUserQueryHandler(AppDbContext db) : IQueryHandler<GetUserQuery, 
 ### Exemple d’utilisation
 
 ```csharp
-public class ServiceUtilisateur(IQueryBus queryBus)
+public class ServiceUtilisateur(IZeroQueryBus queryBus)
 {
     public async Task RecupererUtilisateur()
     {
@@ -69,9 +69,9 @@ Cas d'usage : Exécuter une commande sans résultat attendu.
 
 ```csharp
 // Suppression d’un utilisateur
-public record DeleteUserCommand(int Id) : ICommand;
+public record DeleteUserCommand(int Id) : IZeroCommand;
 
-public class DeleteUserCommandHandler(AppDbContext db) : ICommandHandler<DeleteUserCommand>
+public class DeleteUserCommandHandler(AppDbContext db) : IZeroCommandHandler<DeleteUserCommand>
 {
     public async Task Execute(DeleteUserCommand command, CancellationToken ct = default)
     {
@@ -88,7 +88,7 @@ public class DeleteUserCommandHandler(AppDbContext db) : ICommandHandler<DeleteU
 ### Exemple d’utilisation
 
 ```csharp
-public class ServiceUtilisateur(ICommandBus commandBus)
+public class ServiceUtilisateur(IZeroCommandBus commandBus)
 {
     public async Task SupprimerUtilisateur()
     {
@@ -109,9 +109,9 @@ Cas d'usage : Exécuter une commande et obtenir un résultat.
 ```csharp
 // On créé un utilisateur et on retourne son ID
 
-public record CreateUserCommand(string Name, string Email) : ICommand<int>;
+public record CreateUserCommand(string Name, string Email) : IZeroCommand<int>;
 
-public class CreateUserCommandHandler(AppDbContext db) : ICommandHandler<CreateUserCommand, int>
+public class CreateUserCommandHandler(AppDbContext db) : IZeroCommandHandler<CreateUserCommand, int>
 {
     public async Task<int> Execute(CreateUserCommand command, CancellationToken ct = default)
     {
@@ -126,7 +126,7 @@ public class CreateUserCommandHandler(AppDbContext db) : ICommandHandler<CreateU
 ### Exemple d’utilisation
 
 ```csharp
-public class ServiceUtilisateur(ICommandBus commandBus)
+public class ServiceUtilisateur(IZeroCommandBus commandBus)
 {
     public async Task CreerUtilisateur()
     {

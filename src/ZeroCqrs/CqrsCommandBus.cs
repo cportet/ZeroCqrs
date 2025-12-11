@@ -4,14 +4,14 @@ using System.Threading.Tasks;
 
 namespace ZeroCqrs;
 
-public sealed class CqrsCommandBus(IServiceProvider provider)
+public sealed class CqrsZeroCommandBus(IServiceProvider provider) : IZeroCommandBus
 {
-    public Task Send(ICommand command, CancellationToken ct = default)
+    public Task Send(IZeroCommand command, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(command);
 
         var commandType = command.GetType();
-        var handlerType = typeof(ICommandHandler<>).MakeGenericType(commandType);
+        var handlerType = typeof(IZeroCommandHandler<>).MakeGenericType(commandType);
 
         var handler = (dynamic)provider.GetService(handlerType)
                       ?? throw new CommandHandlerNotFoundException(commandType);
@@ -19,7 +19,7 @@ public sealed class CqrsCommandBus(IServiceProvider provider)
         return handler.Execute((dynamic)command, ct);
     }
 
-    public Task<TResponse> Send<TResponse>(ICommand<TResponse> command, CancellationToken ct = default)
+    public Task<TResponse> Send<TResponse>(IZeroCommand<TResponse> command, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(command);
 

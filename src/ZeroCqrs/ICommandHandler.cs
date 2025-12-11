@@ -3,12 +3,12 @@ using System.Threading.Tasks;
 
 namespace ZeroCqrs;
 
-public interface ICommandHandler<in TCommand> where TCommand : ICommand
+public interface IZeroCommandHandler<in TCommand> where TCommand : IZeroCommand
 {
     Task Execute(TCommand command, CancellationToken ct = default);
 }
 
-public interface ICommandHandler<in TCommand, TResponse> where TCommand : ICommand<TResponse>
+public interface ICommandHandler<in TCommand, TResponse> where TCommand : IZeroCommand<TResponse>
 {
     Task<TResponse> Execute(TCommand command, CancellationToken ct = default);
 }

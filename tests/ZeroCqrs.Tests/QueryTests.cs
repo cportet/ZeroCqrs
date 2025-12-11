@@ -66,31 +66,31 @@ public class QueryTests
         Assert.False(_spy.Executed);
     }
 
-    private CqrsQueryBus RegisterQueryBus()
+    private IZeroQueryBus RegisterQueryBus()
     {
         var services = new ServiceCollection();
         services.AddSingleton(_spy);
         services.AddZeroCqrs(typeof(PingQueryHandler));
 
         var provider = services.BuildServiceProvider();
-        var bus = provider.GetRequiredService<CqrsQueryBus>();
+        var bus = provider.GetRequiredService<IZeroQueryBus>();
 
         return bus;
     }
 }
 
-public record PingQuery : IQuery<string>;
+public record PingQuery : IZeroQuery<string>;
 
-public record PingAsyncQuery : IQuery<string>;
+public record PingAsyncQuery : IZeroQuery<string>;
 
-public record PingCancellableQuery : IQuery<string>;
+public record PingCancellableQuery : IZeroQuery<string>;
 
-public record NotHandlerQuery : IQuery<string>;
+public record NotHandlerQuery : IZeroQuery<string>;
 
 public class PingQueryHandler(HandlerSpy spy) :
-    IQueryHandler<PingQuery, string>,
-    IQueryHandler<PingAsyncQuery, string>,
-    IQueryHandler<PingCancellableQuery, string>
+    IZeroQueryHandler<PingQuery, string>,
+    IZeroQueryHandler<PingAsyncQuery, string>,
+    IZeroQueryHandler<PingCancellableQuery, string>
 {
     public Task<string> Answer(PingQuery query, CancellationToken ct = default)
     {

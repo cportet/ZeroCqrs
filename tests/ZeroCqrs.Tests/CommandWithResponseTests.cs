@@ -71,26 +71,26 @@ public class CommandWithResponseTests
         Assert.False(_spy.Executed);
     }
 
-    private CqrsCommandBus RegisterCommandBus()
+    private IZeroCommandBus RegisterCommandBus()
     {
         var services = new ServiceCollection();
         services.AddSingleton(_spy);
         services.AddZeroCqrsCommands(typeof(DoSomethingWithResultHandler));
 
         var provider = services.BuildServiceProvider();
-        var bus = provider.GetRequiredService<CqrsCommandBus>();
+        var bus = provider.GetRequiredService<IZeroCommandBus>();
 
         return bus;
     }
 }
 
-public sealed record DoSomethingCommandWithResult : ICommand<CommandWithResultResponse>;
+public sealed record DoSomethingCommandWithResult : IZeroCommand<CommandWithResultResponse>;
 
-public sealed record DoAsyncCommandWithResult : ICommand<CommandWithResultResponse>;
+public sealed record DoAsyncCommandWithResult : IZeroCommand<CommandWithResultResponse>;
 
-public sealed record DoCancellableCommandWithResult : ICommand<CommandWithResultResponse>;
+public sealed record DoCancellableCommandWithResult : IZeroCommand<CommandWithResultResponse>;
 
-public sealed class DoCommandWithResultNotHandled : ICommand<bool>;
+public sealed class DoCommandWithResultNotHandled : IZeroCommand<bool>;
 
 public sealed record CommandWithResultResponse(string Message);
 
