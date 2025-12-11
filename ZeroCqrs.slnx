@@ -3,6 +3,7 @@
     <Project Path="samples/ZeroCqrs.Sample/ZeroCqrs.Sample.csproj" Id="681a561f-0c7b-4379-8d42-1b566bc4dd3e" />
   </Folder>
   <Folder Name="/Solution Items/">
+    <File Path=".github/workflows/publish.yml" />
     <File Path="README.md" />
   </Folder>
   <Folder Name="/src/">
