@@ -8,9 +8,6 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -26,7 +23,7 @@ jobs:
           dotnet build --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test --configuration Release --no-build --verbosity normal
+        run: dotnet test --configuration Release --no-build
 
       - name: Pack
         run: |
@@ -38,10 +35,9 @@ jobs:
             -p:Version=$VERSION \
             -p:RepositoryUrl=https://github.com/cportet/ZeroCqrs
 
-      - name: NuGet login (OIDC → temp API key)
-        uses: nuget/setup-nuget@v2
-        with:
-          nuget-api-key: ${{ secrets.NUGET_USER }} 
-
       - name: Publish to NuGet
-        run: dotnet nuget push "./artifacts/*.nupkg" --source https://api.nuget.org/v3/index.json --skip-duplicate
+        run: |
+          dotnet nuget push "./artifacts/*.nupkg" \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
