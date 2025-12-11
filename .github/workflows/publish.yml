@@ -30,7 +30,10 @@ jobs:
         run: dotnet test --configuration Release --no-build --verbosity normal
 
       - name: Pack
-        run: dotnet pack src/ZeroCqrs/ZeroCqrs.csproj --configuration Release -o ./artifacts -p:Version=${{ github.ref_name }} -p:RepositoryUrl=https://github.com/cportet/ZeroCqrs
+        run: |
+          VERSION=${{ github.ref_name }}
+          VERSION=${VERSION#v}
+          dotnet pack src/ZeroCqrs/ZeroCqrs.csproj --configuration Release -o ./artifacts -p:Version=$VERSION -p:RepositoryUrl=https://github.com/cportet/ZeroCqrs
 
       - name: Publish to NuGet (Trusted Publishing)
         run: dotnet nuget push "./artifacts/*.nupkg" --source https://api.nuget.org/v3/index.json --skip-duplicate
