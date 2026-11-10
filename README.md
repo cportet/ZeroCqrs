@@ -1,25 +1,42 @@
 # ZeroCqrs — Le CQRS léger
 
-**Zéro dépendance - Ask / Execute - Rien de plus**
+**Zéro dépendance externe (seulement les abstractions DI de .NET) - Ask / Send - Rien de plus**
 
 ## Installation
 
-Ajouter le package
-*(Pas encore disponible sur NuGet, utiliser le projet localement)*
+Ajouter le package [cportetdev.ZeroCqrs](https://www.nuget.org/packages/cportetdev.ZeroCqrs)
 
 ```bash
-dotnet add package ZeroCqrs
+dotnet add package cportetdev.ZeroCqrs
 ```
 
 Déclarer le service (dans `Program.cs` ou `Startup.cs`)
 
 ```csharp
-// Tout en un
-builder.Services.AddZeroCqrs();
+// Tout en un : scanne l'assembly qui contient le type indiqué
+builder.Services.AddZeroCqrs(typeof(Program));
 
 // Ou séparé (pour un contrôle plus fin)
 builder.Services.AddZeroCqrsQueries(typeof(Program));
 builder.Services.AddZeroCqrsCommands(typeof(Program));
+```
+
+Sans argument, `AddZeroCqrs()` scanne l'assembly d'entrée de l'application : pratique, mais à éviter
+si vos handlers sont dans une autre assembly (bibliothèque, projet de tests…).
+
+Les bus et les handlers sont enregistrés en **scoped**. Dans un singleton (par exemple un
+`BackgroundService` ou un `IHostedService`), créez un scope :
+
+```csharp
+public class Worker(IServiceScopeFactory scopeFactory) : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken ct)
+    {
+        await using var scope = scopeFactory.CreateAsyncScope();
+        var queryBus = scope.ServiceProvider.GetRequiredService<IZeroQueryBus>();
+        // ...
+    }
+}
 ```
 
 ## Requête (Query<T,R>) - Je récupère des données
@@ -95,7 +112,7 @@ public class ServiceUtilisateur(IZeroCommandBus commandBus)
         int userId = 42;
         var command = new DeleteUserCommand(userId);
 
-        await commandBus.Execute(command);
+        await commandBus.Send(command);
     }
 }
 ```
@@ -135,7 +152,7 @@ public class ServiceUtilisateur(IZeroCommandBus commandBus)
 
         var command = new CreateUserCommand(nom, email);
 
-        int newId = await commandBus.Execute(command);
+        int newId = await commandBus.Send(command);
 
         Console.WriteLine($"Nouvel utilisateur créé avec l'ID : {newId}");
     }
