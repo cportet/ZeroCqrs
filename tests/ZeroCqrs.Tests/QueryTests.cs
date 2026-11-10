@@ -12,11 +12,10 @@ public class QueryTests
         var bus = RegisterQueryBus();
 
         using var cts = new CancellationTokenSource();
-        var task = bus.Ask(new PingCancellableQuery(), cts.Token);
+        // Token already cancelled: the handler must receive it and stop right away.
+        cts.Cancel();
 
-        cts.CancelAfter(10);
-
-        await Assert.ThrowsAsync<TaskCanceledException>(() => task);
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => bus.Ask(new PingCancellableQuery(), cts.Token));
         Assert.False(_spy.Executed);
     }
 
