@@ -33,7 +33,7 @@ public static class ServiceCollectionExtensions
             handlerAssemblyMarkerTypes,
             i => i.IsGenericType && (
                 i.GetGenericTypeDefinition() == typeof(IZeroCommandHandler<>) ||
-                i.GetGenericTypeDefinition() == typeof(ICommandHandler<,>)));
+                i.GetGenericTypeDefinition() == typeof(IZeroCommandHandler<,>)));
         return services;
     }
 

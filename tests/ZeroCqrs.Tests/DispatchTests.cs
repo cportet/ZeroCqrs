@@ -90,7 +90,7 @@ internal sealed record InternalCommandWithResponse : IZeroCommand<int>;
 
 internal sealed class InternalExplicitCommandHandler :
     IZeroCommandHandler<InternalCommand>,
-    ICommandHandler<InternalCommandWithResponse, int>
+    IZeroCommandHandler<InternalCommandWithResponse, int>
 {
     Task IZeroCommandHandler<InternalCommand>.Execute(InternalCommand command, CancellationToken ct)
     {
@@ -98,6 +98,6 @@ internal sealed class InternalExplicitCommandHandler :
         return Task.CompletedTask;
     }
 
-    Task<int> ICommandHandler<InternalCommandWithResponse, int>.Execute(InternalCommandWithResponse command, CancellationToken ct)
+    Task<int> IZeroCommandHandler<InternalCommandWithResponse, int>.Execute(InternalCommandWithResponse command, CancellationToken ct)
         => Task.FromResult(4);
 }

@@ -3,7 +3,7 @@
 namespace ZeroCqrs.Sample.Commands;
 
 public class UserCommandsHandlers(UserRepository repository) :
-    ICommandHandler<CreateUser, CreateUserResponse>,
+    IZeroCommandHandler<CreateUser, CreateUserResponse>,
     IZeroCommandHandler<UpdateUser>
 {
     public Task<CreateUserResponse> Execute(CreateUser command, CancellationToken ct = default)
