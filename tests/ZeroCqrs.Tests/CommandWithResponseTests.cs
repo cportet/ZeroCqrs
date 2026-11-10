@@ -64,7 +64,7 @@ public class CommandWithResponseTests
         var bus = RegisterCommandBus();
 
         var ex = await Assert.ThrowsAsync<ArgumentNullException>(
-            () => bus.Send<string>(command: null));
+            () => bus.Send<string>(command: null!));
 
         Assert.Equal("command", ex.ParamName);
         Assert.False(_spy.Executed);

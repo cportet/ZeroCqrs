@@ -59,7 +59,7 @@ public class QueryTests
         var bus = RegisterQueryBus();
 
         var ex = await Assert.ThrowsAsync<ArgumentNullException>(
-            () => bus.Ask<string>(query: null));
+            () => bus.Ask<string>(query: null!));
 
         Assert.Equal("query", ex.ParamName);
         Assert.False(_spy.Executed);
