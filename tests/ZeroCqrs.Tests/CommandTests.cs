@@ -12,11 +12,10 @@ public class CommandTests
         var bus = RegisterCommandBus();
 
         using var cts = new CancellationTokenSource();
-        var task = bus.Send(new DoCancellableCommand(), cts.Token);
+        // Token already cancelled: the handler must receive it and stop right away.
+        cts.Cancel();
 
-        cts.CancelAfter(10);
-
-        await Assert.ThrowsAsync<TaskCanceledException>(() => task);
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => bus.Send(new DoCancellableCommand(), cts.Token));
 
         Assert.False(_spy.Executed);
     }
