@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -11,8 +13,8 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         params Type[] handlerAssemblyMarkerTypes)
     {
-        services.AddScoped<CqrsZeroQueryBus>();
-        services.AddScoped<IZeroQueryBus>(sp => sp.GetRequiredService<CqrsZeroQueryBus>());
+        services.TryAddScoped<CqrsZeroQueryBus>();
+        services.TryAddScoped<IZeroQueryBus>(sp => sp.GetRequiredService<CqrsZeroQueryBus>());
 
         RegisterHandlers(
             services,
@@ -25,8 +27,8 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         params Type[] handlerAssemblyMarkerTypes)
     {
-        services.AddScoped<CqrsZeroCommandBus>();
-        services.AddScoped<IZeroCommandBus>(sp => sp.GetRequiredService<CqrsZeroCommandBus>());
+        services.TryAddScoped<CqrsZeroCommandBus>();
+        services.TryAddScoped<IZeroCommandBus>(sp => sp.GetRequiredService<CqrsZeroCommandBus>());
 
         RegisterHandlers(
             services,
@@ -53,23 +55,50 @@ public static class ServiceCollectionExtensions
             ? markerTypes.Select(t => t.Assembly).Distinct()
             : [Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly()];
 
-        var handlerTypes = assemblies
-            .SelectMany(a => a.GetTypes())
-            .Where(t => !t.IsAbstract && !t.IsInterface &&
-                        t.GetInterfaces().Any(isHandlerInterfacePredicate))
-            .ToArray();
+        RegisterHandlerTypes(services, assemblies.SelectMany(GetLoadableTypes), isHandlerInterfacePredicate);
+    }
 
-        foreach (var handlerType in handlerTypes)
-        {
-            var interfaces = handlerType
-                .GetInterfaces()
+    // Registers each closed handler interface found on the candidate types.
+    // - open generic types are skipped (they cannot be registered as closed services);
+    // - two scanned types handling the same message is an error (instead of "last one wins");
+    // - an interface already registered (previous call, or the user's own registration) is kept.
+    internal static void RegisterHandlerTypes(
+        IServiceCollection services,
+        IEnumerable<Type> candidateTypes,
+        Func<Type, bool> isHandlerInterfacePredicate)
+    {
+        var registrations = candidateTypes
+            .Where(t => t is { IsAbstract: false, IsInterface: false, IsGenericTypeDefinition: false })
+            .SelectMany(t => t.GetInterfaces()
                 .Where(isHandlerInterfacePredicate)
-                .ToArray();
+                .Select(i => (Service: i, Implementation: t)))
+            .GroupBy(r => r.Service);
 
-            foreach (var i in interfaces)
+        foreach (var group in registrations)
+        {
+            var implementations = group.Select(r => r.Implementation).Distinct().ToArray();
+            if (implementations.Length > 1)
             {
-                services.AddScoped(i, handlerType);
+                throw new InvalidOperationException(
+                    $"Several handlers found for '{group.Key}': " +
+                    $"{string.Join(", ", implementations.Select(t => t.FullName))}. " +
+                    "A message must have exactly one handler.");
             }
+
+            services.TryAddScoped(group.Key, implementations[0]);
+        }
+    }
+
+    private static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
+    {
+        try
+        {
+            return assembly.GetTypes();
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            // Some types could not be loaded (missing optional dependency): keep the others.
+            return ex.Types.Where(t => t is not null)!;
         }
     }
 }
