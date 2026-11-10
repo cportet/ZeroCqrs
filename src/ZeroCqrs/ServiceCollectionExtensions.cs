@@ -7,8 +7,24 @@ using System.Reflection;
 
 namespace ZeroCqrs;
 
+/// <summary>
+/// Registers the ZeroCqrs buses and scans assemblies for handlers.
+/// </summary>
+/// <remarks>
+/// Buses and handlers are registered as scoped. Each message type must have exactly one handler;
+/// an interface already registered before the call is kept. Calling the methods several times is safe.
+/// Without marker type, the entry assembly of the application is scanned.
+/// </remarks>
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    /// Registers <see cref="IZeroQueryBus"/> and every <see cref="IZeroQueryHandler{TQuery, TResponse}"/>
+    /// found in the assemblies of <paramref name="handlerAssemblyMarkerTypes"/>.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="handlerAssemblyMarkerTypes">Any type of each assembly to scan. Empty: the entry assembly.</param>
+    /// <returns><paramref name="services"/>, for chaining.</returns>
+    /// <exception cref="InvalidOperationException">Two handlers were found for the same query type.</exception>
     public static IServiceCollection AddZeroCqrsQueries(
         this IServiceCollection services,
         params Type[] handlerAssemblyMarkerTypes)
@@ -23,6 +39,15 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>
+    /// Registers <see cref="IZeroCommandBus"/> and every <see cref="IZeroCommandHandler{TCommand}"/> and
+    /// <see cref="IZeroCommandHandler{TCommand, TResponse}"/> found in the assemblies of
+    /// <paramref name="handlerAssemblyMarkerTypes"/>.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="handlerAssemblyMarkerTypes">Any type of each assembly to scan. Empty: the entry assembly.</param>
+    /// <returns><paramref name="services"/>, for chaining.</returns>
+    /// <exception cref="InvalidOperationException">Two handlers were found for the same command type.</exception>
     public static IServiceCollection AddZeroCqrsCommands(
         this IServiceCollection services,
         params Type[] handlerAssemblyMarkerTypes)
@@ -39,6 +64,14 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>
+    /// Registers both buses and all query and command handlers: same as calling
+    /// <see cref="AddZeroCqrsQueries"/> and <see cref="AddZeroCqrsCommands"/>.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="handlerAssemblyMarkerTypes">Any type of each assembly to scan. Empty: the entry assembly.</param>
+    /// <returns><paramref name="services"/>, for chaining.</returns>
+    /// <exception cref="InvalidOperationException">Two handlers were found for the same message type.</exception>
     public static IServiceCollection AddZeroCqrs(
         this IServiceCollection services,
         params Type[] handlerAssemblyMarkerTypes)
