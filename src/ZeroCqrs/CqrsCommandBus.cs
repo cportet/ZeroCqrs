@@ -10,25 +10,13 @@ public sealed class CqrsZeroCommandBus(IServiceProvider provider) : IZeroCommand
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var commandType = command.GetType();
-        var handlerType = typeof(IZeroCommandHandler<>).MakeGenericType(commandType);
-
-        var handler = (dynamic)provider.GetService(handlerType)
-                      ?? throw new CommandHandlerNotFoundException(commandType);
-
-        return handler.Execute((dynamic)command, ct);
+        return CommandDispatcher.For(command.GetType()).Dispatch(command, provider, ct);
     }
 
     public Task<TResponse> Send<TResponse>(IZeroCommand<TResponse> command, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var commandType = command.GetType();
-        var handlerType = typeof(ICommandHandler<,>).MakeGenericType(commandType, typeof(TResponse));
-
-        var handler = (dynamic)provider.GetService(handlerType)
-                      ?? throw new CommandHandlerNotFoundException(commandType);
-
-        return handler.Execute((dynamic)command, ct);
+        return CommandDispatcher<TResponse>.For(command.GetType()).Dispatch(command, provider, ct);
     }
 }
