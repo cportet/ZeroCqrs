@@ -95,9 +95,9 @@ public sealed class DoCommandWithResultNotHandled : IZeroCommand<bool>;
 public sealed record CommandWithResultResponse(string Message);
 
 public class DoSomethingWithResultHandler(HandlerSpy spy) :
-    ICommandHandler<DoSomethingCommandWithResult, CommandWithResultResponse>,
-    ICommandHandler<DoAsyncCommandWithResult, CommandWithResultResponse>,
-    ICommandHandler<DoCancellableCommandWithResult, CommandWithResultResponse>
+    IZeroCommandHandler<DoSomethingCommandWithResult, CommandWithResultResponse>,
+    IZeroCommandHandler<DoAsyncCommandWithResult, CommandWithResultResponse>,
+    IZeroCommandHandler<DoCancellableCommandWithResult, CommandWithResultResponse>
 {
 
     public Task<CommandWithResultResponse> Execute(

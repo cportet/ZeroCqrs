@@ -70,7 +70,7 @@ internal sealed class CommandDispatcher<TCommand, TResponse> : CommandDispatcher
 {
     public override Task<TResponse> Dispatch(IZeroCommand<TResponse> command, IServiceProvider provider, CancellationToken ct)
     {
-        var handler = provider.GetService<ICommandHandler<TCommand, TResponse>>()
+        var handler = provider.GetService<IZeroCommandHandler<TCommand, TResponse>>()
                       ?? throw new CommandHandlerNotFoundException(typeof(TCommand));
         return handler.Execute((TCommand)command, ct);
     }

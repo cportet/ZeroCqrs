@@ -121,7 +121,7 @@ public class DummyQueryHandler : IZeroQueryHandler<DummyQuery, string>
     public Task<string> Answer(DummyQuery query, CancellationToken ct = default) => Task.FromResult("OK");
 }
 
-public class DummyCommandHandler : ICommandHandler<DummyCommand, string>
+public class DummyCommandHandler : IZeroCommandHandler<DummyCommand, string>
 {
     public Task<string> Execute(DummyCommand command, CancellationToken ct = default) => Task.FromResult("OK");
 }
