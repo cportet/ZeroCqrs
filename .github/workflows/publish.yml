@@ -9,11 +9,15 @@ jobs:
   publish:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      id-token: write # OIDC token, exchanged for a short-lived NuGet API key (trusted publishing)
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
@@ -35,9 +39,17 @@ jobs:
             -p:Version=$VERSION \
             -p:RepositoryUrl=https://github.com/cportet/ZeroCqrs
 
+      # Trusted publishing: requires a policy on nuget.org (owner cportet, repo ZeroCqrs,
+      # workflow publish.yml). The temporary key is valid for 1 hour, so log in right before pushing.
+      - name: NuGet login (OIDC → temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }} # nuget.org profile name, not the email address
+
       - name: Publish to NuGet
         run: |
           dotnet nuget push "./artifacts/*.nupkg" \
-            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --api-key ${{ steps.login.outputs.NUGET_API_KEY }} \
             --source https://api.nuget.org/v3/index.json \
             --skip-duplicate
