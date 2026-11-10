@@ -1,13 +1,20 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using ZeroCqrs.Sample.Commands;
 using ZeroCqrs.Sample.Queries;
 
 namespace ZeroCqrs.Sample;
 
-internal class Runner(IZeroQueryBus zeroQueryBus, IZeroCommandBus zeroCommandBus) : IHostedService
+// A hosted service is a singleton: the buses (and handlers) are scoped,
+// so they must be resolved from a scope created for the unit of work.
+internal class Runner(IServiceScopeFactory scopeFactory) : IHostedService
 {
     public async Task StartAsync(CancellationToken ct)
     {
+        await using var scope = scopeFactory.CreateAsyncScope();
+        var zeroQueryBus = scope.ServiceProvider.GetRequiredService<IZeroQueryBus>();
+        var zeroCommandBus = scope.ServiceProvider.GetRequiredService<IZeroCommandBus>();
+
         // ------ Récupérer le nombre total d'utilisateurs initiaux
         var getRepoCountQuery = new GetUsersCount();
         var usersTotalCount = await zeroQueryBus.Ask(getRepoCountQuery, ct);
